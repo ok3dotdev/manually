@@ -1,69 +1,140 @@
-import Image from "next/image";
+'use client';
+
+import { useChat } from '@ai-sdk/react';
+import { DefaultChatTransport } from 'ai';
+import { useEffect, useRef, useState } from 'react';
+import type { RagAgentUIMessage } from '@/lib/agents/rag-agent';
+
+const SUGGESTIONS = [
+  "What's in your knowledge base?",
+  'Add a fact: the sky is blue because of Rayleigh scattering',
+  'What can you help me with?',
+];
 
 export default function Home() {
+  const { messages, sendMessage, status } = useChat<RagAgentUIMessage>({
+    transport: new DefaultChatTransport({ api: '/api/chat' }),
+  });
+  const [input, setInput] = useState('');
+  const endRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="relative flex flex-1 flex-col bg-white/70 dark:bg-zinc-900/40">
+      {messages.length === 0 ? (
+        <div className="flex flex-1 flex-col items-center justify-center gap-6 px-4 pb-32 text-center">
+          <div className="space-y-1">
+            <h1 className="text-xl font-semibold text-zinc-900 dark:text-white">
+              How can I help?
+            </h1>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              Ask a question or teach me something new.
+            </p>
+          </div>
+          <div className="flex max-w-2xl flex-wrap justify-center gap-2">
+            {SUGGESTIONS.map(suggestion => (
+              <button
+                key={suggestion}
+                type="button"
+                onClick={() => sendMessage({ text: suggestion })}
+                className="rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm text-zinc-600 transition-colors duration-200 hover:border-accent/40 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:text-accent"
+              >
+                {suggestion}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      ) : (
+        <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 overflow-y-auto px-4 pt-8 pb-32">
+          {messages.map(message => (
+            <div
+              key={message.id}
+              className={message.role === 'user' ? 'text-right' : 'text-left'}
+            >
+              <span className="mb-1 block text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                {message.role === 'user' ? 'You' : 'Assistant'}
+              </span>
+              <div
+                className={
+                  'inline-block max-w-[85%] rounded-2xl px-4 py-2 text-sm whitespace-pre-wrap ' +
+                  (message.role === 'user'
+                    ? 'bg-accent text-white'
+                    : 'bg-white text-black shadow-sm dark:bg-zinc-900 dark:text-white')
+                }
+              >
+                {message.parts.map((part, index) => {
+                  if (part.type === 'text') {
+                    return <span key={index}>{part.text}</span>;
+                  }
+                  if (part.type === 'tool-addResource') {
+                    const isDone = part.state === 'output-available' || part.state === 'output-error';
+                    return (
+                      <div
+                        key={index}
+                        className="flex items-center gap-1.5 italic text-zinc-400 dark:text-zinc-500"
+                      >
+                        {!isDone && (
+                          <span className="h-3 w-3 shrink-0 animate-spin rounded-full border-2 border-zinc-400 border-t-transparent dark:border-zinc-500" />
+                        )}
+                        {isDone
+                          ? 'added resource to knowledge base'
+                          : 'adding resource to knowledge base...'}
+                      </div>
+                    );
+                  }
+                  if (part.type === 'tool-getInformation') {
+                    const isDone = part.state === 'output-available' || part.state === 'output-error';
+                    return (
+                      <div
+                        key={index}
+                        className="flex items-center gap-1.5 italic text-zinc-400 dark:text-zinc-500"
+                      >
+                        {!isDone && (
+                          <span className="h-3 w-3 shrink-0 animate-spin rounded-full border-2 border-zinc-400 border-t-transparent dark:border-zinc-500" />
+                        )}
+                        {isDone ? 'checked knowledge base' : 'checking knowledge base...'}
+                      </div>
+                    );
+                  }
+                  return null;
+                })}
+              </div>
+            </div>
+          ))}
+          <div ref={endRef} />
         </div>
-      </main>
+      )}
+
+      <div className="pointer-events-none fixed inset-x-0 bottom-0 flex justify-center px-4 pb-6">
+        <form
+          className="pointer-events-auto flex w-full max-w-2xl gap-2 rounded-full border border-zinc-200/70 bg-white/90 p-1.5 shadow-xl shadow-accent/10 backdrop-blur-md transition-shadow duration-200 focus-within:shadow-2xl focus-within:shadow-accent/30 dark:border-zinc-800/70 dark:bg-zinc-900/90"
+          onSubmit={e => {
+            e.preventDefault();
+            if (input.trim()) {
+              sendMessage({ text: input });
+              setInput('');
+            }
+          }}
+        >
+          <input
+            className="flex-1 rounded-full bg-transparent px-4 py-2 text-sm text-black focus:outline-none dark:text-white"
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            disabled={status !== 'ready'}
+            placeholder="Ask a question or teach me something..."
+          />
+          <button
+            className="rounded-full bg-accent px-5 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-accent/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2 disabled:opacity-50 dark:focus-visible:ring-offset-zinc-900"
+            type="submit"
+            disabled={status !== 'ready'}
+          >
+            Send
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
