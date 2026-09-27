@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="https://manually.vercel.app">Live demo</a>
+  <a href="https://rag-chat-app-two.vercel.app/">Live demo</a>
 </p>
 
 <br />
