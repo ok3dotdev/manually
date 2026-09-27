@@ -44,16 +44,23 @@ export default function Home() {
           transition={{ duration: 0.3 }}
           className="relative flex flex-1 flex-col items-center justify-center gap-6 px-4 pb-32 text-center"
         >
-          <motion.div
+          <div
             aria-hidden="true"
-            className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[26rem] w-[26rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/15 blur-[110px] dark:bg-accent/25"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: [0.95, 1.05, 0.95] }}
-            transition={{
-              opacity: { duration: 0.6, ease: 'easeOut' },
-              scale: { duration: 8, repeat: Infinity, ease: 'easeInOut' },
-            }}
-          />
+            className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+          >
+            <motion.div
+              className="absolute left-1/2 top-1/2 h-[30rem] w-[30rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/[0.06] blur-[130px] dark:bg-accent/10"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 1, ease: 'easeOut' }}
+            />
+            <motion.div
+              className="absolute left-1/2 top-1/2 h-56 w-56 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/[0.08] blur-[70px] dark:bg-accent/[0.14]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 1, ease: 'easeOut', delay: 0.15 }}
+            />
+          </div>
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
