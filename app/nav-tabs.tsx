@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { motion } from 'framer-motion';
 
 const tabs = [
   { href: '/', label: 'Chat' },
@@ -12,7 +13,12 @@ export function NavTabs() {
   const pathname = usePathname();
 
   return (
-    <nav className="relative flex items-center justify-center gap-4 py-4">
+    <motion.nav
+      initial={{ opacity: 0, y: -6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+      className="relative flex items-center justify-center gap-4 py-4"
+    >
       <span className="absolute left-4 flex items-center gap-2">
         <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-accent">
           <svg
@@ -43,17 +49,24 @@ export function NavTabs() {
               key={tab.href}
               href={tab.href}
               className={
-                'rounded-full px-4 py-1.5 text-sm font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 ' +
+                'relative rounded-full px-4 py-1.5 text-sm font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 ' +
                 (active
-                  ? 'bg-accent text-white shadow-sm'
+                  ? 'text-white'
                   : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white')
               }
             >
-              {tab.label}
+              {active && (
+                <motion.span
+                  layoutId="nav-pill"
+                  className="absolute inset-0 rounded-full bg-accent shadow-sm"
+                  transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                />
+              )}
+              <span className="relative z-10">{tab.label}</span>
             </Link>
           );
         })}
       </div>
-    </nav>
+    </motion.nav>
   );
 }

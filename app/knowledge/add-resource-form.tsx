@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState, useRef, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { addResourceAction, addPdfResourceAction } from '@/lib/actions/resources';
 
 const initialState = { message: '' };
@@ -42,14 +43,18 @@ export function AddResourceForm() {
         className="rounded-xl border border-zinc-300 bg-white px-4 py-2 text-sm text-black transition-colors duration-200 focus:outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white"
       />
       <div className="flex items-center gap-3">
-        <button
+        <motion.button
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.96 }}
           type="submit"
           disabled={isPending}
           className="self-start rounded-full bg-accent px-5 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-accent/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2 disabled:opacity-50 dark:focus-visible:ring-offset-zinc-900"
         >
           {isPending ? 'Adding...' : 'Add'}
-        </button>
-        <button
+        </motion.button>
+        <motion.button
+          whileHover={{ scale: 1.06 }}
+          whileTap={{ scale: 0.94 }}
           type="button"
           onClick={() => fileInputRef.current?.click()}
           disabled={isPdfPending}
@@ -76,7 +81,7 @@ export function AddResourceForm() {
               />
             </svg>
           )}
-        </button>
+        </motion.button>
         <input
           ref={fileInputRef}
           type="file"
