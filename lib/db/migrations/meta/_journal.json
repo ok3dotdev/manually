@@ -15,6 +15,13 @@
       "when": 1790457438852,
       "tag": "0001_groovy_rick_jones",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790468396036,
+      "tag": "0002_bumpy_machine_man",
+      "breakpoints": true
     }
   ]
 }

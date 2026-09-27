@@ -100,6 +100,7 @@ export const addPdfResourceAction = async (
         fileUrl: blob.url,
         mimeType: file.type,
         pageCount,
+        fileSize: file.size,
       })
       .returning();
 

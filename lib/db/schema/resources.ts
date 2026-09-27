@@ -13,6 +13,7 @@ export const resources = pgTable('resources', {
   fileUrl: text('file_url'),
   mimeType: varchar('mime_type', { length: 128 }),
   pageCount: integer('page_count'),
+  fileSize: integer('file_size'),
   createdAt: timestamp('created_at').notNull().default(sql`now()`),
   updatedAt: timestamp('updated_at').notNull().default(sql`now()`),
 });
