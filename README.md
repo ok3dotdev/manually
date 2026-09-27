@@ -8,6 +8,10 @@
   <img src="https://img.shields.io/badge/deployed%20on-Vercel-black?style=flat-square" alt="Deployed on Vercel">
 </p>
 
+<p align="center">
+  <a href="https://rag-chat-app-two.vercel.app">Live demo</a>
+</p>
+
 <br />
 
 ## Why this exists
