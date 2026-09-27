@@ -12,7 +12,10 @@ export function NavTabs() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex justify-center py-4">
+    <nav className="relative flex items-center justify-center gap-4 py-4">
+      <span className="absolute left-4 text-sm font-semibold tracking-tight text-zinc-900 dark:text-white">
+        Manually
+      </span>
       <div className="inline-flex items-center gap-1 rounded-full border border-zinc-200 bg-white/80 p-1 shadow-sm backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-900/80">
         {tabs.map(tab => {
           const active = pathname === tab.href;

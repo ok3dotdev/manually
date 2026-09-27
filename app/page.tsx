@@ -6,9 +6,9 @@ import { useEffect, useRef, useState } from 'react';
 import type { RagAgentUIMessage } from '@/lib/agents/rag-agent';
 
 const SUGGESTIONS = [
+  'My dishwasher is showing error code E15, what do I do?',
+  'How often should I change the thermostat filter?',
   "What's in your knowledge base?",
-  'Add a fact: the sky is blue because of Rayleigh scattering',
-  'What can you help me with?',
 ];
 
 export default function Home() {
