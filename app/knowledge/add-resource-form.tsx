@@ -44,7 +44,6 @@ export function AddResourceForm() {
       />
       <div className="flex items-center gap-3">
         <motion.button
-          whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.96 }}
           type="submit"
           disabled={isPending}
@@ -53,7 +52,6 @@ export function AddResourceForm() {
           {isPending ? 'Adding...' : 'Add'}
         </motion.button>
         <motion.button
-          whileHover={{ scale: 1.06 }}
           whileTap={{ scale: 0.94 }}
           type="button"
           onClick={() => fileInputRef.current?.click()}
