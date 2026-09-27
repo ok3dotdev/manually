@@ -105,9 +105,9 @@ export function ResourceTabs({
         {tab === 'notes' ? (
           <motion.div
             key="notes"
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
           >
             {notes.length === 0 ? (
@@ -148,9 +148,9 @@ export function ResourceTabs({
         ) : (
           <motion.div
             key="files"
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
           >
             {files.length === 0 ? (
