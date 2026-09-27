@@ -49,13 +49,21 @@ export default function Home() {
             className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
           >
             <motion.div
-              className="absolute left-1/2 top-1/2 h-[30rem] w-[30rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/[0.06] blur-[130px] dark:bg-accent/10"
+              className="absolute left-1/2 top-1/2 h-[38rem] w-[38rem] -translate-x-1/2 -translate-y-1/2 rounded-full"
+              style={{
+                background:
+                  'radial-gradient(circle, color-mix(in srgb, var(--accent) 12%, transparent) 0%, transparent 65%)',
+              }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 1, ease: 'easeOut' }}
             />
             <motion.div
-              className="absolute left-1/2 top-1/2 h-56 w-56 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/[0.08] blur-[70px] dark:bg-accent/[0.14]"
+              className="absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full"
+              style={{
+                background:
+                  'radial-gradient(circle, color-mix(in srgb, var(--accent) 20%, transparent) 0%, transparent 70%)',
+              }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 1, ease: 'easeOut', delay: 0.15 }}
