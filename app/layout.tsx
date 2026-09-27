@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { NavTabs } from "./nav-tabs";
+import { PageTransition } from "./page-transition";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -29,7 +30,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <header className="border-b border-zinc-200/70 bg-white/70 backdrop-blur-sm dark:border-zinc-800/70 dark:bg-zinc-900/40">
           <NavTabs />
         </header>
-        {children}
+        <PageTransition>{children}</PageTransition>
       </body>
     </html>
   );
