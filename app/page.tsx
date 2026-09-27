@@ -42,8 +42,18 @@ export default function Home() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
-          className="flex flex-1 flex-col items-center justify-center gap-6 px-4 pb-32 text-center"
+          className="relative flex flex-1 flex-col items-center justify-center gap-6 px-4 pb-32 text-center"
         >
+          <motion.div
+            aria-hidden="true"
+            className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[26rem] w-[26rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/15 blur-[110px] dark:bg-accent/25"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: [0.95, 1.05, 0.95] }}
+            transition={{
+              opacity: { duration: 0.6, ease: 'easeOut' },
+              scale: { duration: 8, repeat: Infinity, ease: 'easeInOut' },
+            }}
+          />
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
