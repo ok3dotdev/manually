@@ -144,12 +144,7 @@ export default function Home() {
         </div>
       )}
 
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35, ease: 'easeOut', delay: 0.05 }}
-        className="pointer-events-none fixed inset-x-0 bottom-0 flex justify-center px-4 pb-6"
-      >
+      <div className="pointer-events-none fixed inset-x-0 bottom-0 flex justify-center px-4 pb-6">
         <form
           className="pointer-events-auto flex w-full max-w-2xl gap-2 rounded-full border border-zinc-200/70 bg-white/90 p-1.5 shadow-xl shadow-accent/10 backdrop-blur-md transition-shadow duration-200 focus-within:shadow-2xl focus-within:shadow-accent/30 dark:border-zinc-800/70 dark:bg-zinc-900/90"
           onSubmit={e => {
@@ -177,7 +172,7 @@ export default function Home() {
             Send
           </motion.button>
         </form>
-      </motion.div>
+      </div>
     </div>
   );
 }
