@@ -1,6 +1,6 @@
 import { InferAgentUIMessage, ToolLoopAgent } from 'ai';
-import { addResourceTool } from '@/lib/tools/add-resource-tool';
-import { getInformationTool } from '@/lib/tools/get-information-tool';
+import { addResourceTool } from '@/lib/agents/tools/add-resource';
+import { getInformationTool } from '@/lib/agents/tools/get-information';
 
 export const ragAgent = new ToolLoopAgent({
   model: 'openai/gpt-4o-mini',

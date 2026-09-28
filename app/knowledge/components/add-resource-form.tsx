@@ -2,6 +2,7 @@
 
 import { useActionState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Spinner } from '@/components/ui/spinner';
 import { addResourceAction, addPdfResourceAction } from '@/lib/actions/resources';
 
 const initialState = { message: '' };
@@ -61,7 +62,7 @@ export function AddResourceForm() {
           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-zinc-300 text-zinc-500 transition-colors duration-200 hover:border-accent/40 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-400"
         >
           {isPdfPending ? (
-            <span className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-400 border-t-transparent" />
+            <Spinner size="md" />
           ) : (
             <svg
               xmlns="http://www.w3.org/2000/svg"

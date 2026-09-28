@@ -1,6 +1,6 @@
 import { getResources } from '@/lib/db/queries/resources';
-import { AddResourceForm } from './add-resource-form';
-import { ResourceTabs } from './resource-tabs';
+import { AddResourceForm } from './components/add-resource-form';
+import { ResourceTabs } from './components/resource-tabs';
 
 export default async function KnowledgePage() {
   const items = await getResources();
