@@ -7,5 +7,8 @@ export const getInformationTool = tool({
   inputSchema: z.object({
     question: z.string().describe('the users question'),
   }),
-  execute: async ({ question }) => findRelevantContent(question),
+  // Supplied by the server per request, never by the model.
+  contextSchema: z.object({ userId: z.string() }),
+  execute: async ({ question }, { context }) =>
+    findRelevantContent(context.userId, question),
 });

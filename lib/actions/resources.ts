@@ -3,39 +3,29 @@
 import { del, put } from '@vercel/blob';
 import { nanoid } from 'nanoid';
 import { revalidatePath } from 'next/cache';
+import { requireUserId } from '@/lib/auth';
 import { MAX_PDF_SIZE_BYTES, extractPdfText } from '@/lib/ai/pdf';
 import { storeEmbeddings } from '@/lib/db/queries/embeddings';
 import {
   createPdfResource,
-  createTextResource,
   deleteResourceById,
 } from '@/lib/db/queries/resources';
-import { insertResourceSchema, type NewResourceParams } from '@/lib/db/schema/resources';
-
-export const createResource = async (input: NewResourceParams) => {
-  try {
-    const { content } = insertResourceSchema.parse(input);
-    const resource = await createTextResource(content);
-    await storeEmbeddings(resource.id, content);
-
-    revalidatePath('/knowledge');
-    return 'Resource successfully created and embedded.';
-  } catch (error) {
-    return error instanceof Error && error.message.length > 0
-      ? error.message
-      : 'Error, please try again.';
-  }
-};
+import { createResource } from '@/lib/resources';
 
 export const addResourceAction = async (
   _prevState: { message: string },
   formData: FormData,
 ) => {
-  const content = formData.get('content');
-  const message = await createResource({
-    content: typeof content === 'string' ? content : '',
-  });
-  return { message };
+  try {
+    const userId = await requireUserId();
+    const content = formData.get('content');
+    const message = await createResource(userId, {
+      content: typeof content === 'string' ? content : '',
+    });
+    return { message };
+  } catch (error) {
+    return { message: (error as Error).message };
+  }
 };
 
 export const addPdfResourceAction = async (
@@ -43,6 +33,7 @@ export const addPdfResourceAction = async (
   formData: FormData,
 ) => {
   try {
+    const userId = await requireUserId();
     const file = formData.get('file');
 
     if (!(file instanceof File) || file.size === 0) {
@@ -66,12 +57,13 @@ export const addPdfResourceAction = async (
       };
     }
 
-    const blob = await put(`pdfs/${nanoid()}-${file.name}`, buffer, {
+    const blob = await put(`pdfs/${userId}/${nanoid()}-${file.name}`, buffer, {
       access: 'private',
       contentType: 'application/pdf',
     });
 
     const resource = await createPdfResource({
+      userId,
       content: text,
       fileName: file.name,
       fileUrl: blob.url,
@@ -80,7 +72,7 @@ export const addPdfResourceAction = async (
       fileSize: file.size,
     });
 
-    await storeEmbeddings(resource.id, text);
+    await storeEmbeddings(userId, resource.id, text);
 
     revalidatePath('/knowledge');
     return { message: `"${file.name}" uploaded and embedded.` };
@@ -95,7 +87,9 @@ export const addPdfResourceAction = async (
 };
 
 export const deleteResource = async (id: string) => {
-  const resource = await deleteResourceById(id);
+  const userId = await requireUserId();
+  // Scoped by owner, so someone else's id is a no-op rather than a delete.
+  const resource = await deleteResourceById(userId, id);
 
   if (resource?.fileUrl) {
     await del(resource.fileUrl);

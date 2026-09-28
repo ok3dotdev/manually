@@ -12,6 +12,9 @@ export const embeddings = pgTable(
       () => resources.id,
       { onDelete: 'cascade' },
     ),
+    // Copied from the parent resource so similarity search can filter by
+    // owner without a join.
+    userId: varchar('user_id', { length: 191 }).notNull(),
     content: text('content').notNull(),
     embedding: vector('embedding', { dimensions: 1536 }).notNull(),
   },
@@ -20,5 +23,6 @@ export const embeddings = pgTable(
       'hnsw',
       table.embedding.op('vector_cosine_ops'),
     ),
+    index('embeddings_user_id_idx').on(table.userId),
   ],
 );

@@ -1,5 +1,5 @@
 import { embed, embedMany } from 'ai';
-import { cosineDistance, desc, gt, sql } from 'drizzle-orm';
+import { and, cosineDistance, eq, lt, sql } from 'drizzle-orm';
 import { getDb } from '@/lib/db';
 import { embeddings } from '@/lib/db/schema/embeddings';
 
@@ -100,18 +100,27 @@ export const generateEmbedding = async (value: string): Promise<number[]> => {
   return embedding;
 };
 
-export const findRelevantContent = async (userQuery: string) => {
+export const findRelevantContent = async (userId: string, userQuery: string) => {
   const db = getDb();
   const userQueryEmbedded = await generateEmbedding(userQuery);
-  const similarity = sql<number>`1 - (${cosineDistance(
-    embeddings.embedding,
-    userQueryEmbedded,
-  )})`;
-  const similarGuides = await db
-    .select({ content: embeddings.content, similarity })
+  const distance = cosineDistance(embeddings.embedding, userQueryEmbedded);
+  // Ordering by the raw distance (not 1 - distance) lets Postgres use the
+  // HNSW index.
+  const query = db
+    .select({ content: embeddings.content, similarity: sql<number>`1 - (${distance})` })
     .from(embeddings)
-    .where(gt(similarity, MIN_SIMILARITY))
-    .orderBy(t => desc(t.similarity))
+    .where(
+      and(eq(embeddings.userId, userId), lt(distance, 1 - MIN_SIMILARITY)),
+    )
+    .orderBy(distance)
     .limit(4);
+  // HNSW finds nearest neighbours first and applies the user_id filter
+  // afterwards, so with many users a plain scan can come back empty even
+  // though this user has matches. Iterative scans keep searching until the
+  // LIMIT is filled. SET LOCAL only lasts for this batch's transaction.
+  const [, similarGuides] = await db.batch([
+    db.execute(sql`SET LOCAL hnsw.iterative_scan = strict_order`),
+    query,
+  ]);
   return similarGuides;
 };
