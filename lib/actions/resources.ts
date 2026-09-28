@@ -1,41 +1,22 @@
 'use server';
 
 import { del, put } from '@vercel/blob';
-import { eq } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import { revalidatePath } from 'next/cache';
-import { getDb } from '@/lib/db';
-import { generateEmbeddings } from '@/lib/ai/embedding';
 import { MAX_PDF_SIZE_BYTES, extractPdfText } from '@/lib/ai/pdf';
-import { embeddings as embeddingsTable } from '@/lib/db/schema/embeddings';
+import { storeEmbeddings } from '@/lib/db/queries/embeddings';
 import {
-  insertResourceSchema,
-  resources,
-  type NewResourceParams,
-} from '@/lib/db/schema/resources';
-
-const embedAndStore = async (resourceId: string, content: string) => {
-  const db = getDb();
-  const generatedEmbeddings = await generateEmbeddings(content);
-  await db.insert(embeddingsTable).values(
-    generatedEmbeddings.map(embedding => ({
-      resourceId,
-      ...embedding,
-    })),
-  );
-};
+  createPdfResource,
+  createTextResource,
+  deleteResourceById,
+} from '@/lib/db/queries/resources';
+import { insertResourceSchema, type NewResourceParams } from '@/lib/db/schema/resources';
 
 export const createResource = async (input: NewResourceParams) => {
   try {
     const { content } = insertResourceSchema.parse(input);
-    const db = getDb();
-
-    const [resource] = await db
-      .insert(resources)
-      .values({ content })
-      .returning();
-
-    await embedAndStore(resource.id, content);
+    const resource = await createTextResource(content);
+    await storeEmbeddings(resource.id, content);
 
     revalidatePath('/knowledge');
     return 'Resource successfully created and embedded.';
@@ -90,21 +71,16 @@ export const addPdfResourceAction = async (
       contentType: 'application/pdf',
     });
 
-    const db = getDb();
-    const [resource] = await db
-      .insert(resources)
-      .values({
-        content: text,
-        sourceType: 'pdf',
-        fileName: file.name,
-        fileUrl: blob.url,
-        mimeType: file.type,
-        pageCount,
-        fileSize: file.size,
-      })
-      .returning();
+    const resource = await createPdfResource({
+      content: text,
+      fileName: file.name,
+      fileUrl: blob.url,
+      mimeType: file.type,
+      pageCount,
+      fileSize: file.size,
+    });
 
-    await embedAndStore(resource.id, text);
+    await storeEmbeddings(resource.id, text);
 
     revalidatePath('/knowledge');
     return { message: `"${file.name}" uploaded and embedded.` };
@@ -119,11 +95,7 @@ export const addPdfResourceAction = async (
 };
 
 export const deleteResource = async (id: string) => {
-  const db = getDb();
-  const [resource] = await db
-    .delete(resources)
-    .where(eq(resources.id, id))
-    .returning();
+  const resource = await deleteResourceById(id);
 
   if (resource?.fileUrl) {
     await del(resource.fileUrl);
