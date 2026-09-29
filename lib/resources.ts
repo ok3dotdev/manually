@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { revalidatePath } from 'next/cache';
+import { z } from 'zod';
 import { storeEmbeddings } from '@/lib/db/queries/embeddings';
 import { createTextResource } from '@/lib/db/queries/resources';
 import { insertResourceSchema, type NewResourceParams } from '@/lib/db/schema/resources';
@@ -20,8 +21,14 @@ export const createResource = async (
     revalidatePath('/knowledge');
     return 'Resource successfully created and embedded.';
   } catch (error) {
-    return error instanceof Error && error.message.length > 0
-      ? error.message
-      : 'Error, please try again.';
+    // Validation errors describe the user's own input, so they're safe to
+    // show. Anything else (DB, embedding provider, network) is logged and
+    // hidden behind a generic message so internals never reach the client.
+    if (error instanceof z.ZodError) {
+      return error.issues[0]?.message ?? 'Please enter some content.';
+    }
+
+    console.error('createResource failed', { userId, error });
+    return "We couldn't save that resource. Please try again.";
   }
 };
