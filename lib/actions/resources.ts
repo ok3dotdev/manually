@@ -3,7 +3,7 @@
 import { del, put } from '@vercel/blob';
 import { nanoid } from 'nanoid';
 import { revalidatePath } from 'next/cache';
-import { requireUserId } from '@/lib/auth';
+import { UnauthorizedError, requireUserId } from '@/lib/auth';
 import { MAX_PDF_SIZE_BYTES, extractPdfText } from '@/lib/ai/pdf';
 import { storeEmbeddings } from '@/lib/db/queries/embeddings';
 import {
@@ -24,7 +24,11 @@ export const addResourceAction = async (
     });
     return { message };
   } catch (error) {
-    return { message: (error as Error).message };
+    if (error instanceof UnauthorizedError) {
+      return { message: error.message };
+    }
+    console.error('addResourceAction failed', error);
+    return { message: 'Something went wrong. Please try again.' };
   }
 };
 
@@ -77,12 +81,11 @@ export const addPdfResourceAction = async (
     revalidatePath('/knowledge');
     return { message: `"${file.name}" uploaded and embedded.` };
   } catch (error) {
-    return {
-      message:
-        error instanceof Error && error.message.length > 0
-          ? error.message
-          : 'Error, please try again.',
-    };
+    if (error instanceof UnauthorizedError) {
+      return { message: error.message };
+    }
+    console.error('addPdfResourceAction failed', error);
+    return { message: "We couldn't upload that file. Please try again." };
   }
 };
 
