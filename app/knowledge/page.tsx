@@ -1,9 +1,13 @@
+import { auth } from '@clerk/nextjs/server';
 import { getResources } from '@/lib/db/queries/resources';
 import { AddResourceForm } from './components/add-resource-form';
 import { ResourceTabs } from './components/resource-tabs';
 
 export default async function KnowledgePage() {
-  const items = await getResources();
+  const { userId, redirectToSignIn } = await auth();
+  if (!userId) return redirectToSignIn();
+
+  const items = await getResources(userId);
   const notes = items.filter(resource => resource.sourceType !== 'pdf');
   const files = items.filter(resource => resource.sourceType === 'pdf');
 

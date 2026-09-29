@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useRef, useEffect } from 'react';
+import { startTransition, useActionState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Spinner } from '@/components/ui/spinner';
 import { addResourceAction, addPdfResourceAction } from '@/lib/actions/resources';
@@ -31,7 +31,9 @@ export function AddResourceForm() {
     if (!file) return;
     const formData = new FormData();
     formData.set('file', file);
-    pdfFormAction(formData);
+    // Called outside a form submit, so it needs an explicit transition for
+    // isPdfPending to update.
+    startTransition(() => pdfFormAction(formData));
   };
 
   return (

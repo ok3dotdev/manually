@@ -1,6 +1,6 @@
 import { tool } from 'ai';
 import { z } from 'zod';
-import { createResource } from '@/lib/actions/resources';
+import { createResource } from '@/lib/resources';
 
 export const addResourceTool = tool({
   description: `add a resource to your knowledge base.
@@ -10,5 +10,8 @@ export const addResourceTool = tool({
       .string()
       .describe('the content or resource to add to the knowledge base'),
   }),
-  execute: async ({ content }) => createResource({ content }),
+  // Supplied by the server per request, never by the model.
+  contextSchema: z.object({ userId: z.string() }),
+  execute: async ({ content }, { context }) =>
+    createResource(context.userId, { content }),
 });

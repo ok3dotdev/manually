@@ -1,19 +1,19 @@
-import { eq } from 'drizzle-orm';
+import { auth } from '@clerk/nextjs/server';
 import { get } from '@vercel/blob';
-import { getDb } from '@/lib/db';
-import { resources } from '@/lib/db/schema/resources';
+import { getResourceById } from '@/lib/db/queries/resources';
 
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const { userId } = await auth();
+  if (!userId) {
+    return new Response('Unauthorized', { status: 401 });
+  }
+
   const { id } = await params;
-  const db = getDb();
-  const [resource] = await db
-    .select()
-    .from(resources)
-    .where(eq(resources.id, id))
-    .limit(1);
+  // Another user's file is a 404, not a 403, so ids can't be probed.
+  const resource = await getResourceById(userId, id);
 
   if (!resource?.fileUrl) {
     return new Response('Not found', { status: 404 });
