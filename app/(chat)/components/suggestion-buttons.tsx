@@ -1,9 +1,10 @@
 import { motion } from 'framer-motion';
 
 const SUGGESTIONS = [
-  'My dishwasher is showing error code E15, what do I do?',
-  'How often should I change the thermostat filter?',
-  "What's in your knowledge base?",
+  'How much notice does my landlord need to enter my unit?',
+  'How often can my landlord raise the rent?',
+  'Can my landlord ask for a damage deposit?',
+  "What can I do if my landlord won't make repairs?",
 ];
 
 const listVariants = {
