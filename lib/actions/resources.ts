@@ -47,7 +47,7 @@ export const addPdfResourceAction = async (
       return { message: 'Only PDF files are supported.' };
     }
     if (file.size > MAX_PDF_SIZE_BYTES) {
-      return { message: 'PDF is too large (max 20MB).' };
+      return { message: `PDF is too large (max ${MAX_PDF_SIZE_BYTES / 1024 / 1024}MB).` };
     }
 
     const buffer = await file.arrayBuffer();

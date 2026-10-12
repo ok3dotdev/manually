@@ -1,6 +1,7 @@
 import { extractText, getDocumentProxy } from 'unpdf';
 
-export const MAX_PDF_SIZE_BYTES = 20 * 1024 * 1024;
+// Must stay below serverActions.bodySizeLimit in next.config.ts.
+export const MAX_PDF_SIZE_BYTES = 4 * 1024 * 1024;
 
 export const extractPdfText = async (
   data: ArrayBuffer,
