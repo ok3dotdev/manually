@@ -2,6 +2,7 @@ import { embed, embedMany } from 'ai';
 import { and, cosineDistance, eq, lt, sql } from 'drizzle-orm';
 import { getDb } from '@/lib/db';
 import { embeddings } from '@/lib/db/schema/embeddings';
+import { chunkStatute, looksLikeStatute } from '@/lib/ai/legal-chunker';
 
 const embeddingModel = 'cohere/embed-v4.0';
 
@@ -80,15 +81,42 @@ export const generateChunks = (input: string): string[] => {
   return groupIntoSections(lines).flatMap(packSection);
 };
 
+type ChunkRow = {
+  content: string;
+  citation: string | null;
+  section: string | null;
+  subsection: string | null;
+  heading: string | null;
+};
+
+// Statutes get one chunk per subsection with a citation header; everything
+// else uses the generic chunker.
+const chunkDocument = (value: string): ChunkRow[] =>
+  looksLikeStatute(value)
+    ? chunkStatute(value, { docLabel: 'RTA' }).map(c => ({
+        content: c.content,
+        citation: c.citation,
+        section: c.section,
+        subsection: c.subsection,
+        heading: c.heading,
+      }))
+    : generateChunks(value).map(content => ({
+        content,
+        citation: null,
+        section: null,
+        subsection: null,
+        heading: null,
+      }));
+
 export const generateEmbeddings = async (
   value: string,
-): Promise<{ content: string; embedding: number[] }[]> => {
-  const chunks = generateChunks(value);
+): Promise<(ChunkRow & { embedding: number[] })[]> => {
+  const chunks = chunkDocument(value);
   const { embeddings: vectors } = await embedMany({
     model: embeddingModel,
-    values: chunks,
+    values: chunks.map(c => c.content),
   });
-  return vectors.map((embedding, i) => ({ content: chunks[i], embedding }));
+  return vectors.map((embedding, i) => ({ ...chunks[i], embedding }));
 };
 
 export const generateEmbedding = async (value: string): Promise<number[]> => {
@@ -107,13 +135,18 @@ export const findRelevantContent = async (userId: string, userQuery: string) => 
   // Ordering by the raw distance (not 1 - distance) lets Postgres use the
   // HNSW index.
   const query = db
-    .select({ content: embeddings.content, similarity: sql<number>`1 - (${distance})` })
+    .select({
+      citation: embeddings.citation,
+      content: embeddings.content,
+      similarity: sql<number>`1 - (${distance})`,
+    })
     .from(embeddings)
     .where(
       and(eq(embeddings.userId, userId), lt(distance, 1 - MIN_SIMILARITY)),
     )
     .orderBy(distance)
-    .limit(4);
+    // Broad questions ("what are my options...") span several sections.
+    .limit(8);
   // HNSW finds nearest neighbours first and applies the user_id filter
   // afterwards, so with many users a plain scan can come back empty even
   // though this user has matches. Iterative scans keep searching until the

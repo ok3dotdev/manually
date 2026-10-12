@@ -16,6 +16,12 @@ export const embeddings = pgTable(
     // owner without a join.
     userId: varchar('user_id', { length: 191 }).notNull(),
     content: text('content').notNull(),
+    // Statute structure, set when the source is chunked as legislation.
+    // Null for ordinary documents.
+    citation: varchar('citation', { length: 64 }), // "s. 26(3)"
+    section: varchar('section', { length: 16 }), // "26"
+    subsection: varchar('subsection', { length: 16 }), // "3"
+    heading: text('heading'),
     embedding: vector('embedding', { dimensions: 1536 }).notNull(),
   },
   table => [
