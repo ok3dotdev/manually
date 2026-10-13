@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "db:generate": "dotenv -e .env.local -- drizzle-kit generate",
-    "db:migrate": "dotenv -e .env.local -- tsx lib/db/migrate.ts"
+    "db:migrate": "dotenv -e .env.local -- tsx lib/db/migrate.ts",
+    "evals": "dotenv -e .env.local -- tsx --conditions=react-server evals/run-rta-evals.ts"
   },
   "dependencies": {
     "@ai-sdk/react": "^4.0.119",
