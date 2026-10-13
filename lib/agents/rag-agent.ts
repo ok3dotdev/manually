@@ -11,7 +11,7 @@ export const createRagAgent = (
   userId: string,
   {
     addResource = addResourceTool,
-    model = 'openai/gpt-4o-mini',
+    model = 'openai/gpt-4.1',
   }: { addResource?: typeof addResourceTool; model?: string } = {},
 ) =>
   new ToolLoopAgent({
